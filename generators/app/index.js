@@ -1,38 +1,52 @@
-'use strict';
-const Generator = require('yeoman-generator');
-const chalk = require('chalk');
-const yosay = require('yosay');
+"use strict";
+const Generator = require("yeoman-generator");
+const path = require("path");
+const nodefs = require("fs");
+
+const SCHEMA_FOLDER = "_schema";
 
 module.exports = class extends Generator {
-  prompting() {
-    // Have Yeoman greet the user.
-    this.log(
-      yosay(`Welcome to the cat\'s meow ${chalk.red('generator-stone')} generator!`)
-    );
-
+  async prompting() {
     const prompts = [
       {
-        type: 'confirm',
-        name: 'someAnswer',
-        message: 'Would you like to enable this option?',
-        default: true
+        type: "list",
+        name: "_lang",
+        message: "Generate State JSON Machine Code on this language : ",
+        choices: ["Flutter", "Svelte", "<Others to be created>"],
+        default: "Flutter"
       }
     ];
 
-    return this.prompt(prompts).then(props => {
-      // To access props later use this.props.someAnswer;
-      this.props = props;
-    });
+    const props = await this.prompt(prompts);
+    // To access props later use this.props.someAnswer;
+    this.props = props;
   }
 
   writing() {
-    this.fs.copy(
-      this.templatePath('dummyfile.txt'),
-      this.destinationPath('dummyfile.txt')
-    );
+    const destPath = this.destinationRoot();
+    const schemaPath = destPath + path.sep + SCHEMA_FOLDER;
+    const dir = nodefs.opendirSync(schemaPath);
+    let dirent;
+    this.fs.copy([this.templatePath("**/*"), "!_pageTemplate.dart"], destPath, {
+      globOptions: { ignore: ["_*.*"], dot: true }
+    });
+    while ((dirent = dir.readSync()) !== null) {
+      console.log(dirent.name);
+      let json = require(schemaPath + path.sep + dirent.name);
+      console.log("json got is: ", json);
+      this.fs.copyTpl(
+        this.templatePath("_pageTemplate.dart"),
+        this.destinationPath("lib/" + json.id + ".dart"),
+        json
+      );
+    }
+
+    dir.closeSync();
   }
 
   install() {
-    this.installDependencies();
+    /* Continue here
+    this.spawnCommand("flutter", ["pub", "get"]);
+    */
   }
 };

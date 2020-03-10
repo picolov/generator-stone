@@ -6,7 +6,7 @@
   "author": {
     "name": "picolov",
     "email": "picolov@gmail.com",
-    "url": "www.picolov.com"
+    "url": "http://www.picolov.com"
   },
   "files": [
     "generators"
@@ -36,9 +36,7 @@
     "npm": ">= 4.0.0"
   },
   "dependencies": {
-    "yeoman-generator": "^2.0.1",
-    "chalk": "^2.1.0",
-    "yosay": "^2.0.1"
+    "yeoman-generator": "^2.0.1"
   },
   "jest": {
     "testEnvironment": "node"
