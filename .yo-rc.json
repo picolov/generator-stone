@@ -1,0 +1,9 @@
+{
+  "generator-node": {
+    "promptValues": {
+      "authorName": "picolov",
+      "authorEmail": "picolov@gmail.com",
+      "authorUrl": "www.picolov.com"
+    }
+  }
+}
