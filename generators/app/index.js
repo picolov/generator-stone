@@ -24,24 +24,26 @@ module.exports = class extends Generator {
 
   writing() {
     const destPath = this.destinationRoot();
-    const schemaPath = destPath + path.sep + SCHEMA_FOLDER;
-    const dir = nodefs.opendirSync(schemaPath);
-    let dirent;
-    this.fs.copy([this.templatePath("**/*"), "!_pageTemplate.dart"], destPath, {
-      globOptions: { ignore: ["_*.*"], dot: true }
-    });
-    while ((dirent = dir.readSync()) !== null) {
-      console.log(dirent.name);
-      let json = require(schemaPath + path.sep + dirent.name);
-      console.log("json got is: ", json);
-      this.fs.copyTpl(
-        this.templatePath("_pageTemplate.dart"),
-        this.destinationPath("lib/" + json.id + ".dart"),
-        json
-      );
-    }
+    if (this.props._lang === "Flutter") {
+      const schemaPath = destPath + path.sep + SCHEMA_FOLDER;
+      const dir = nodefs.opendirSync(schemaPath);
+      let dirent;
+      this.fs.copy(this.templatePath("Flutter/**"), destPath, {
+        globOptions: { ignore: ["_*.*"], dot: true }
+      });
+      while ((dirent = dir.readSync()) !== null) {
+        console.log(dirent.name);
+        let json = require(schemaPath + path.sep + dirent.name);
+        console.log("json got is: ", json);
+        this.fs.copyTpl(
+          this.templatePath("Flutter_template/_page.dart"),
+          this.destinationPath("lib/" + json.id + ".dart"),
+          json
+        );
+      }
 
-    dir.closeSync();
+      dir.closeSync();
+    }
   }
 
   install() {
