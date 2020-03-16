@@ -1,4 +1,4 @@
-package com.example.stone_flutter
+package com.example.built_redux
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity

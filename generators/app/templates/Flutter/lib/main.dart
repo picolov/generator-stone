@@ -1,106 +1,74 @@
+// Copyright 2018 The Flutter Architecture Sample Authors. All rights reserved.
+// Use of this source code is governed by the MIT license that can be found
+// in the LICENSE file.
+
+library built_redux_sample;
+
+import 'package:built_redux/built_redux.dart';
+import 'package:built_redux_sample/actions/actions.dart';
+import 'package:built_redux_sample/containers/add_todo.dart';
+import 'package:built_redux_sample/localization.dart';
+import 'package:built_redux_sample/middleware/store_todos_middleware.dart';
+import 'package:built_redux_sample/models/models.dart';
+import 'package:built_redux_sample/presentation/home_screen.dart';
+import 'package:built_redux_sample/reducers/reducers.dart';
 import 'package:flutter/material.dart';
-import 'package:english_words/english_words.dart';
+import 'package:flutter_built_redux/flutter_built_redux.dart';
+import 'package:todos_app_core/todos_app_core.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(BuiltReduxApp());
+}
 
-class MyApp extends StatelessWidget {
+class BuiltReduxApp extends StatefulWidget {
+  final store = Store<AppState, AppStateBuilder, AppActions>(
+    reducerBuilder.build(),
+    AppState.loading(),
+    AppActions(),
+    middleware: [
+      createStoreTodosMiddleware(),
+    ],
+  );
+
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Startup Name Generator',
-      home: RandomWords(),
-      theme: ThemeData(primaryColor: Colors.limeAccent, fontFamily: "Arial"),
-    );
+  State<StatefulWidget> createState() {
+    return BuiltReduxAppState();
   }
 }
 
-class RandomWordsState extends State<RandomWords> {
-  final _suggestions = <WordPair>[];
-  final _biggerFont = const TextStyle(fontSize: 30.0);
-  final _biggerFont2 =
-      const TextStyle(fontSize: 20.0, fontFamily: "Roboto Mono");
-  final Set<WordPair> _saved = Set<WordPair>();
+class BuiltReduxAppState extends State<BuiltReduxApp> {
+  Store<AppState, AppStateBuilder, AppActions> store;
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Startup Name Generator'),
-        actions: <Widget>[
-          IconButton(icon: Icon(Icons.list), onPressed: _pushSaved),
-        ],
-      ),
-      body: _buildSuggestions(),
-    );
+  void initState() {
+    store = widget.store;
+
+    store.actions.fetchTodosAction();
+
+    super.initState();
   }
 
-  void _pushSaved() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) {
-          final Iterable<ListTile> tiles = _saved.map(
-            (WordPair pair) {
-              return ListTile(
-                title: Text(
-                  pair.asPascalCase,
-                  style: _biggerFont2,
-                ),
-              );
-            },
-          );
-          final List<Widget> divided = ListTile.divideTiles(
-            context: context,
-            tiles: tiles,
-          ).toList();
-          return Scaffold(
-            appBar: AppBar(
-              title: Text('Saved Suggestions'),
-            ),
-            body: ListView(children: divided),
-          );
+  @override
+  Widget build(BuildContext context) {
+    return ReduxProvider(
+      store: store,
+      child: MaterialApp(
+        onGenerateTitle: (context) =>
+            BuiltReduxLocalizations.of(context).appTitle,
+        theme: ArchSampleTheme.theme,
+        localizationsDelegates: [
+          ArchSampleLocalizationsDelegate(),
+          BuiltReduxLocalizationsDelegate(),
+        ],
+        routes: {
+          ArchSampleRoutes.home: (context) {
+            return HomeScreen(key: ArchSampleKeys.homeScreen);
+          },
+          ArchSampleRoutes.addTodo: (context) {
+            return AddTodo();
+          },
         },
       ),
     );
   }
-
-  Widget _buildSuggestions() {
-    return ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemBuilder: /*1*/ (context, i) {
-          if (i.isOdd) return Divider(); /*2*/
-
-          final index = i ~/ 2; /*3*/
-          if (index >= _suggestions.length) {
-            _suggestions.addAll(generateWordPairs().take(10)); /*4*/
-          }
-          return _buildRow(_suggestions[index]);
-        });
-  }
-
-  Widget _buildRow(WordPair pair) {
-    final bool alreadySaved = _saved.contains(pair);
-    return ListTile(
-      title: Text(
-        pair.asPascalCase,
-        style: _biggerFont,
-      ),
-      trailing: Icon(
-        alreadySaved ? Icons.favorite : Icons.favorite_border,
-        color: alreadySaved ? Colors.red : null,
-      ),
-      onTap: () {
-        setState(() {
-          if (alreadySaved) {
-            _saved.remove(pair);
-          } else {
-            _saved.add(pair);
-          }
-        });
-      },
-    );
-  }
-}
-
-class RandomWords extends StatefulWidget {
-  @override
-  RandomWordsState createState() => RandomWordsState();
 }

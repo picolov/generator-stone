@@ -1,5 +1,5 @@
-name: stone_flutter
-description: A new <%= _lang %> project.
+name: built_redux_sample
+description: A new Flutter project.
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -19,15 +19,26 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^0.1.2
-  english_words: ^3.1.0
+  flutter_built_redux:
+  built_redux:
+  built_value:
+  built_collection:
+  todos_app_core:
+    path: ./todos_app_core
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_driver:
+    sdk: flutter
+  test:
+  build:
+  build_runner:
+  built_value_generator:
+  source_gen:
+  mockito:
+  integration_tests:
+    path: ./integration_tests
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
