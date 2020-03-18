@@ -1,0 +1,13 @@
+<head>
+    <var name="num01" type="integer"></var>
+    <var name="str01" type="string"></var>
+    <script type="module" src="https://unpkg.com/@ui5/webcomponents/dist/Label?module"></script>
+    <script type="module" src="https://unpkg.com/@ui5/webcomponents/dist/Input?module"></script>
+    <script type="module" src="https://unpkg.com/@ui5/webcomponents/dist/Button?module"></script>
+</head>
+
+<pi-col>
+    <ui5-label>Haloo {str01}</ui5-label>
+    <ui5-input value="str01" on:input="setValue('str01', args[0].target.value)"></ui5-input>
+    <ui5-button on:click="alert(str01)">press</ui5-button>
+</pi-col>

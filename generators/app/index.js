@@ -1,9 +1,22 @@
 "use strict";
 const Generator = require("yeoman-generator");
-const path = require("path");
-const nodefs = require("fs");
+const { JSDOM } = require("jsdom");
 
-const SCHEMA_FOLDER = "_schema";
+const pageHtml = `
+<head>
+    <var name="num01" type="integer"></var>
+    <var name="str01" type="string"></var>
+    <script type="module" src="https://unpkg.com/@ui5/webcomponents/dist/Label?module"></script>
+    <script type="module" src="https://unpkg.com/@ui5/webcomponents/dist/Input?module"></script>
+    <script type="module" src="https://unpkg.com/@ui5/webcomponents/dist/Button?module"></script>
+</head>
+
+<pi-col>
+    <ui5-label>Haloo {str01}</ui5-label>
+    <ui5-input value="str01" on:input="setValue('str01', args[0].target.value)"></ui5-input>
+    <ui5-button on:click="alert(str01)">press</ui5-button>
+</pi-col>
+`;
 
 module.exports = class extends Generator {
   async prompting() {
@@ -13,7 +26,7 @@ module.exports = class extends Generator {
         name: "_lang",
         message: "Generate State JSON Machine Code on this language : ",
         choices: ["Flutter", "Svelte", "<Others to be created>"],
-        default: "Flutter"
+        default: "Svelte"
       }
     ];
 
@@ -24,31 +37,38 @@ module.exports = class extends Generator {
 
   writing() {
     const destPath = this.destinationRoot();
-    if (this.props._lang === "Flutter") {
-      const schemaPath = destPath + path.sep + SCHEMA_FOLDER;
-      const dir = nodefs.opendirSync(schemaPath);
-      let dirent;
-      this.fs.copy(this.templatePath("Flutter/**"), destPath, {
-        globOptions: { ignore: ["_*.*"], dot: true }
-      });
-      while ((dirent = dir.readSync()) !== null) {
-        console.log(dirent.name);
-        let json = require(schemaPath + path.sep + dirent.name);
-        console.log("json got is: ", json);
+    switch (this.props._lang) {
+      case "Flutter":
+        break;
+      case "Svelte": {
+        console.log("------->999");
+        const dom = new JSDOM(pageHtml);
+        console.log("body2: ", dom.window.document.body.innerHTML);
+        const templateData = {};
+        this.fs.copy(this.templatePath("Svelte/**"), destPath, {
+          globOptions: { ignore: ["_*.*"], dot: true }
+        });
         this.fs.copyTpl(
-          this.templatePath("Flutter_template/_page.dart"),
-          this.destinationPath("lib/" + json.id + ".dart"),
-          json
+          this.templatePath("Svelte_template/App.template"),
+          this.destinationPath("src/App.svelte"),
+          templateData
         );
+        break;
       }
 
-      dir.closeSync();
+      default:
     }
   }
 
   install() {
-    /* Continue here
-    this.spawnCommand("flutter", ["pub", "get"]);
-    */
+    switch (this.props._lang) {
+      case "Flutter":
+        break;
+      case "Svelte":
+        //this.spawnCommandSync("npm", ["install"]);
+        //this.spawnCommandSync("npm", ["run", "dev"]);
+        break;
+      default:
+    }
   }
 };
